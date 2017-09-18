@@ -24,17 +24,15 @@ Using powershell or terminal, navigate to the folder containing the box file and
 > vagrant up
 # Hands-on with Pachyderm
 
-Hands-on with Pachyderm
-
 Useful information
 
 The most common way to interact with Pachyderm is by using the Pachyderm Client (pachctl). You can explore the different commands available by using:
 
-pachctl  --help
+> pachctl  --help
 
 And if you need more information about a particular command please use:
 
-pachctl <name of the command> --help
+> pachctl <name of the command> --help
 
 Running a Pachyderm pipeline
 
