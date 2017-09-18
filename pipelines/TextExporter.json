@@ -1,0 +1,28 @@
+{
+  "pipeline": {
+    "name": "TextExporter"
+  },
+   "transform": {
+    "image": "novella/my-openms:2",
+    "cmd": [ "/bin/bash" ],
+    "stdin": [
+    "for filename in /pfs/FeatureLinker/*;",
+    "do",
+    "shortname=$(basename $filename)",
+    "shortname=${shortname%.*}",
+    "dash='_'",
+    "TextExporter -in ${filename} -out /pfs/out/${shortname}${dash}tab.csv",
+    "done"
+    ]
+  },
+"parallelism_spec": {
+    "constant": 1
+  },
+ "input": {
+    "atom": {
+      "repo": "FeatureLinker",
+      "glob": "/*"
+    }
+  },
+  "scale_down_threshold": "5m"
+}
