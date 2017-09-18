@@ -6,7 +6,7 @@
     "image": "novella/my-openms:2",
     "cmd": [ "/bin/bash" ],
     "stdin": [
-    "for filename in /pfs/FileFilter2/*;",
+    "for filename in /pfs/FeatureLinker/*;",
     "do",
     "shortname=$(basename $filename)",
     "shortname=${shortname%.*}",
@@ -20,7 +20,7 @@
   },
  "input": {
     "atom": {
-      "repo": "FileFilter2",
+      "repo": "FeatureLinker",
       "glob": "/*"
     }
   },
