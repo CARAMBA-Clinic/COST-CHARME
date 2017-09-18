@@ -114,15 +114,7 @@ Did any new job get triggered? What data is being processed now? All available d
 ```bash
 > pachctl list-commit <repo-name>
 ```
-## How to develop a simple R-based microservice
-
-When migrating your monolitic workflow to a microservice-based infrastructure, you will have to split it in smaller, interchangeable, tasks. This is anyway a general good practice to follow when you develop your software, that will promote *separation of concern* and reusability. 
-
-Here we propose a microservice infrastructure based on MANTL. In MANTL, complex applications are built deploying Docker containers that act as microservices. When separating your application in Docker containers, it is important to find a good strategy to share data between them. In MANTL, [GlusterFS](https://www.gluster.org/) is used to provide a distributed filesystem where containers, that can potentially run on different nodes, can share data. Therefore, you can assume that each microservice in a complex workflow reads the input, and it writes the output, form some volume that will be mounted by MANTL. 
-
-Here we use a workflow by the Kultima lab as benchmark. In this tutorial you will deploy your very own MANTL cluster, and run this workflow using an interactive Jupyter [notebook](https://github.com/phnmnl/workflow-demo/blob/master/Jupyter/Workflow.ipynb). Please give a quick look to it before to proceed with the next section. 
-
-### Develop microservices with Docker
+## How to develop a simple R-based microservice with Docker
 
 In this section we show how to wrap a simple R-script in a Docker image, that can act as a microservice in a more complex workflow. For the best learning experience, we recommend that you repeat every step on your own.  
 
