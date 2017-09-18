@@ -8,7 +8,7 @@
     "stdin": [ 
     "dte=$(date '+%d_%m_%Y_%H_%M')",
     "FILES=$(find /pfs/FeatureFinder -name \"*.featureXML\")",
-    "FeatureLinkerUnlabeledQT -in $FILES -out /pfs/out/${dte}linked.consensusXML"
+    "FeatureLinkerUnlabeledQT -in $FILES -out /pfs/out/${dte}linked.consensusXML -algorithm:nr_partitions 10"
     ]
   },
 "parallelism_spec": {
