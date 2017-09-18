@@ -11,9 +11,9 @@ In Windows:
 - Install VirtualBox: https://www.virtualbox.org/wiki/Downloads
 
 - Open PowerShell and run: 
-
+```bash
 > choco install vagrant
-
+```
 In Mac & linux: 
 
 You should be able to download the installation files for your operating system:
@@ -104,7 +104,7 @@ Let’s create a new commit in a parental structure. To do this we will simply d
 ```bash
 > pachctl put-file <name of the repo> <name of the branch> -c -r -p <number of files to upload in parallel> -f .
 ```
-Did any new job get triggered? What data is being processed now? Explore which new commits have been made as a result of the new input data.
+Did any new job get triggered? What data is being processed now? All available data or just new data? Explore which new commits have been made as a result of the new input data. 
 ```bash
 > pachctl list-commit <repo-name>
 ```
