@@ -109,3 +109,61 @@ Did any new job get triggered? What data is being processed now? All available d
 ```bash
 > pachctl list-commit <repo-name>
 ```
+## How to develop a simple R-based microservice
+
+When migrating your monolitic workflow to a microservice-based infrastructure, you will have to split it in smaller, interchangeable, tasks. This is anyway a general good practice to follow when you develop your software, that will promote *separation of concern* and reusability. 
+
+Here we propose a microservice infrastructure based on MANTL. In MANTL, complex applications are built deploying Docker containers that act as microservices. When separating your application in Docker containers, it is important to find a good strategy to share data between them. In MANTL, [GlusterFS](https://www.gluster.org/) is used to provide a distributed filesystem where containers, that can potentially run on different nodes, can share data. Therefore, you can assume that each microservice in a complex workflow reads the input, and it writes the output, form some volume that will be mounted by MANTL. 
+
+Here we use a workflow by the Kultima lab as benchmark. In this tutorial you will deploy your very own MANTL cluster, and run this workflow using an interactive Jupyter [notebook](https://github.com/phnmnl/workflow-demo/blob/master/Jupyter/Workflow.ipynb). Please give a quick look to it before to proceed with the next section. 
+
+### Develop microservices with Docker
+
+In this section we show how to wrap a simple R-script in a Docker image, that can act as a microservice in a more complex workflow. For the best learning experience, we recommend that you repeat every step on your own.  
+
+Here we use one of the smallest services in the benchmark pipeline, the [log2transformation](https://github.com/phnmnl/workflow-demo/tree/master/log2transformation). This process will take intensity data as an input, and transform it to the log2 base scale. The missing values will be further imputed by zeros. Please notice that in this R script, the data is read/write from/to the disk.
+
+```R
+args <- commandArgs(trailingOnly = TRUE)
+
+input = args[1]
+output = args[2]
+samples<-read.table(input,sep='\t',header=T)
+
+samples=log2(samples)
+samples[is.na(samples)]=0
+
+write.table(samples,file=output,sep='\t',row.names=F)
+```
+
+All you need to do in order to wrap this script in a Docker image is to write a [Dockerfile](https://docs.docker.com/engine/reference/builder/). An example follows.
+
+```Docker
+FROM r-base
+MAINTAINER Stephanie Herman, stephanie.herman.3820@student.uu.se
+
+ADD log2transformation.r /
+ENTRYPOINT ["Rscript", "log2transformation.r"]
+```
+
+In the Dockerfile you first specify a base image that you want to start **FROM**. If you are working to an R-based service, like we are doing, the base image *r-base* is a good choice, as it includes all of the dependencies you need to run your script. Then, you provide the **MAINTAINER**, that is typically your name and a contact.
+
+The last two lines in our simple Docker file are the most important. The **ADD** instruction serves to add a file in the build context to a directory in your Docker image. In fact, we use it to add our *log2transformation.r* script in the root directory. Finally, the *ENTRYPOINT* instruction, specifies which command to run when the container will be started. Of course, we use it to run our script.
+
+When you are done with the Dockerfile, you need to build the image. The `docker build` command does the job. 
+
+```
+$ docker build -t log2transformation .
+```
+
+In the previous command we build the image, naming it *log2transformation*, and specifying the current directory as the build context. To successfully run this command, it is very important that the build context, the current directory, contains both the *Dockerfile* and the *log2transformation.r* script. If everything works fine it will say that the image was successfully built.
+
+The `docker run` command serves to run a service that has been previously built. You can use this [input data](https://raw.githubusercontent.com/phnmnl/workflow-demo/master/data/log2_input.xls) to try out the following command.
+
+```
+$ docker run -v /host/directory/data:/data log2transformation /data/log2_input.xls /data/log2_output.xls
+```
+
+In the previous command we use the `-v` argument to specify a directory on our host machine, that will be mount on the Docker container. This directory is supposed to contain the [log2_input.xls](https://raw.githubusercontent.com/phnmnl/workflow-demo/master/data/log2_input.xls) file. Then we specify the name of the container that we aim to run (*log2transformation*), and the arguments that will be passed to the entry point command. We mounted the host direcory under */data* in the Docker container, hence we use the arguments to instruct the R script to read/write the input from/to it.    
+
+You can read more on how to develop Docker images on the Docker [documentation](https://docs.docker.com/). 
