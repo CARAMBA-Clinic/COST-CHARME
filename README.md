@@ -24,7 +24,7 @@ You should be able to download the installation files for your operating system:
 ## Set up the vagrant box
 Using PowerShell or Terminal, navigate to the folder containing the box file and run:
 ```bash
-> vagrant up
+> vagrant up --provision
 ```
 SSH into the machine 
 ```bash
