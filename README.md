@@ -22,8 +22,10 @@ install virtualbox https://www.virtualbox.org/wiki/Downloads
 # Set up the vagrant box
 Using powershell or terminal, navigate to the folder containing the box file and run:
 > vagrant up
+
 SSH into the machine 
 > vagrant ssh
+
 Check jupyter notebook and Rstudio:
 Open a web browser and navigate to [localhost:8888](localhost:8888) for jupyter notebook and [localhost:8787](localhost:8787) for Rstudio.
 
