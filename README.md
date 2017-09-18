@@ -22,6 +22,14 @@ install virtualbox https://www.virtualbox.org/wiki/Downloads
 # Set up the vagrant box
 Using powershell or terminal, navigate to the folder containing the box file and run:
 > vagrant up
+SSH into the machine 
+> vagrant ssh
+Check jupyter notebook and Rstudio:
+Open a web browser and navigate to:
+> localhost:8888
+and
+> localhost: 8787
+
 # Hands-on with Pachyderm
 
 Useful information
@@ -45,7 +53,7 @@ You can push data into this repository using the put-file command. This will cre
 
 > pachctl put-file <name of the repo> <name of the branch> -c -r -p <number of files to upload in parallel> -f <./path/to/dataset>
 
-Once your data is in the repository, you are ready to start a bunch of pipelines cranking through data in a distributed fashion. Pipelines are the core processing primitive in Pachyderm and they’re specified with a JSON encoding. Explore the pipelines folder and find out which of the pipelines is the first step of the pre-processing workflow. You can run it using:
+Once your data is in the repository, you are ready to start a bunch of pipelines cranking through data in a distributed fashion. Pipelines are the core processing primitive in Pachyderm and theyâ€™re specified with a JSON encoding. Explore the pipelines folder and find out which of the pipelines is the first step of the pre-processing workflow. You can run it using:
 
 > pachctl create-pipeline -f <JSON file>
 
@@ -78,7 +86,7 @@ Pachyderm uses a Data Repository within its File System. This means that it will
 
 Pipelines automatically process the data as new commits are finished. Think of pipelines as being subscribed to any new commits on their input repositories. Similarly to Git, commits have a parental structure that tracks which files have changed. In this case we are going add some more metabolite data files.
 
-Let’s create a new commit in a parental structure. To do this we will simply do two more put-file commands with -c and by specifying master as the branch, it’ll automatically parent our commits onto each other. Branch names are just references to a particular HEAD commit.
+Letâ€™s create a new commit in a parental structure. To do this we will simply do two more put-file commands with -c and by specifying master as the branch, itâ€™ll automatically parent our commits onto each other. Branch names are just references to a particular HEAD commit.
 
 > pachctl put-file <name of the repo> <name of the branch> -c -r -p <number of files to upload in parallel> -f <./path/to/dataset>
 
