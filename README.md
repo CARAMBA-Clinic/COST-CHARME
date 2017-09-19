@@ -129,8 +129,10 @@ Did any new job get triggered? What data is being processed now? All available d
 After exporting the TextExporter csv file, you are ready to do some downstream analysis.
 On your host machine, open a browser tab and go to localhost:8787. There you will find the common interface of RStudio, where we have placed the following code to get you started. 
 ```R
+# required R packages
 library(R.utils)
 library(ggplot2)
+library(ropls)
 .
 .
 inputFile = ""
@@ -139,25 +141,30 @@ outputFile = ""
 .
 ggsave(outputFile, plot = plot.plsda, width = 10, height = 10)
 ```
-You need to change "inputFile" to the path of the file you exported from TextExporter and also pick an arbitrary name for your output.
-Now select the whole code inside the code editor and run using <kbd>Ctrl+Enter</kbd> or press source in the top right corrner. 
-You can explore your dataset using RStudio functionalities such as view(data_parsed) or by simply clicking the the variables in the environment window. Or how about doing a boxplot to see the distribution of the data ?
+
+Essentially, this code will take the output from the TextExporter as an input, and generate a partial least squeare discriminant analysis (PLS-DA) score plot as an output. Features with a coverage higher than 75% across all samples will be considered and missing values will simply be imputed by zeros.
+
+You need to change "inputFile" to the path of the file you exported from TextExporter and pick an arbitrary name for your output.
+Now select the whole code inside the code editor and run using <kbd>Ctrl+Enter</kbd> or press source in the top right corner. 
+You can explore your dataset using RStudio functionalities such as view(data_parsed) or by simply clicking the the variables in the environment window. Or how about doing a boxplot to see the distribution of the samples?
 ```R
 boxplot(log2(data_parsed[,-c(1,2)]))
 ```
 ## How to develop a simple R-based microservice with Docker
 
-In this section we show how to wrap your R-script in a Docker image and integrate it into your workflow using Pachyderm. For the best learning experience, we recommend that you repeat every step on your own.  
-
-Here we use the R-script peforming PLS-DA for demonstration. This process will take the output from the TextExporter as an input, and generate a PLS-DA score plot as an output. Features with a coverage higher than 75% across all samples will be considered and missing values will simply be imputed by zeros.
+In this section we show you how to wrap your R-script in a Docker image and integrate it into your workflow using Pachyderm. 
+This is a slightly modified version of the R script that you just used. The modification accounts for the need to be able to feed user specified input and output filenames through command line. Assuming that teh following R script has been saved as *plsda.r*, it ca be run using *plsda.r input output*. Where *input* is the path to the result from the TextExporter and *output* is the desired name of your plsda image.
 
 ```R
 #!/usr/bin/env Rscript
 
 options(stringAsfactors = FALSE, useFancyQuotes = FALSE)
 
+# required R packages
 library(R.utils)
 library(ggplot2)
+library(ropls)
+
 source('/usr/local/bin/Functions.r')
 
 # Get arguments
@@ -197,7 +204,6 @@ data_cov[is.na(data_cov)] <- 0
 Y <- substr(names(data_cov),0,3)[-c(1,2)]
 X <- data_cov[,-c(1,2)]
 
-library(ropls)
 data.plsda <- opls(t(X), Y, predI = 2, scaleC='standard')
 
 plotdata <- data.frame(data.plsda@scoreMN, Y)
@@ -208,14 +214,18 @@ plot.plsda <- ggplot(plotdata, aes(x=p1, y=p2,shape=Y, color=Y)) + geom_point(si
 ggsave(outputFile, plot = plot.plsda, width = 10, height = 10)
 ```
 
-All you need to do in order to wrap this script in a Docker image is to write a [Dockerfile](https://docs.docker.com/engine/reference/builder/). An example follows.
+In order to create a Docker container we follow the scheme recommended by Phenomenal (for guidance see the dockerized xcms R package: https://github.com/phnmnl/container-xcms). First, the required linux and R packages must be installed. The provided R scripts should be placed in a separate folder which is added to the appropriate folder inside the container and granted execution permission. Now, all you need to do in order to wrap your R script in a Docker image is to write a [Dockerfile](https://docs.docker.com/engine/reference/builder/). In order to do that, please have a look at the Dockerfile in the example.
+
+To do this exercise you can either use the Jupyter notebook terminal or you can *ssh* into the machine to navigate and manage your structure.
 
 ```Docker
 FROM r-base
 MAINTAINER Stephanie Herman, stephanie.herman@medsci.uu.se
 
-ADD plsda.r /
-RUN ["Rscript", "plsda.r"]
+# Fill out lines by looking at the given example
+RUN # install the needed linux and R packages
+ADD # add all scripts to container
+RUN # give execution permission to the R scripts
 ```
 
 In the Dockerfile you first specify a base image that you want to start **FROM**. If you are working to an R-based service, like we are doing, the base image *r-base* is a good choice, as it includes all of the dependencies you need to run your script. Then, you provide the **MAINTAINER**, that is typically your name and a contact.
@@ -228,14 +238,14 @@ When you are done with the Dockerfile, you need to build the image. The `docker 
 $ docker build -t plsda .
 ```
 
-In the previous command we build the image, naming it *plsda*, specifying the current directory as the build context. To successfully run this command, it is very important that the build context, the current directory, contains both the *Dockerfile* and the *plsda.r* script (and any other scripts that are needed). If everything works fine it will say that the image was successfully built.
+In the previous command we build the image, naming it *plsda*, specifying the current directory as the build context. To successfully run this command, it is very important that the build context, the current directory, contains both the *Dockerfile* and the *scripts* folder. If everything works fine it will say that the image was successfully built.
 
-The `docker run` command serves to run a service that has been previously built.
+To verify that your image works correctly and as excpected, you can use the `docker run` command, which serves to run a service that has been previously built.
 
 ```
 $ docker run -v /host/directory/data:/data plsda /data/textexporter.csv /data/plsda.png
 ```
 
-In the previous command we use the `-v` argument to specify a directory on our host machine, that will be mount on the Docker container (note that the full path needs to be provided). This directory is supposed to contain the [textexporter.csv] file. Then we specify the name of the container that we aim to run (*plsda*), and the arguments that will be passed to the **RUN** command. We mounted the host direcory under */data* in the Docker container, hence we use the arguments to instruct the R script to read/write the input from/to it.    
+In the previous command we use the `-v` argument to specify a directory on our host machine, that will be mount on the Docker container (note that the full path needs to be provided). This directory is supposed to contain the output of TextExporter. Then we specify the name of the container that we aim to run (*plsda*), and the arguments that will be passed to the **RUN** command. We mounted the host direcory under */data* in the Docker container, hence we use the arguments to instruct the R script to read/write the input from/to it.    
 
 You can read more on how to develop Docker images on the Docker [documentation](https://docs.docker.com/). 
