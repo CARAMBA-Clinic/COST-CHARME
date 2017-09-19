@@ -116,51 +116,95 @@ Did any new job get triggered? What data is being processed now? All available d
 ```
 ## How to develop a simple R-based microservice with Docker
 
-In this section we show how to wrap a simple R-script in a Docker image, that can act as a microservice in a more complex workflow. For the best learning experience, we recommend that you repeat every step on your own.  
+In this section we show how to wrap an R-script in a Docker image, that can act as a microservice in a more complex workflow. For the best learning experience, we recommend that you repeat every step on your own.  
 
-Here we use one of the smallest services in the benchmark pipeline, the [log2transformation](https://github.com/phnmnl/workflow-demo/tree/master/log2transformation). This process will take intensity data as an input, and transform it to the log2 base scale. The missing values will be further imputed by zeros. Please notice that in this R script, the data is read/write from/to the disk.
+Here we use an R-script peforming PLS-DA for demonstration. This process will take the output from the TextExporter as an input, and generate a PLS-DA score plot as an output. Feature with a coverage higher than 75% across all smaples will be considered and missing values will simply be imputed by zeros.
 
 ```R
+#!/usr/bin/env Rscript
+
+options(stringAsfactors = FALSE, useFancyQuotes = FALSE)
+
+library(R.utils)
+library(ggplot2)
+source('/usr/local/bin/Functions.r')
+
+# Get arguments
 args <- commandArgs(trailingOnly = TRUE)
 
-input = args[1]
-output = args[2]
-samples<-read.table(input,sep='\t',header=T)
+inputFile = args[1]
+outputFile = args[2]
 
-samples=log2(samples)
-samples[is.na(samples)]=0
+# Read the TextExporter output
+nL <- countLines(inputFile)
+nL = read.csv(inputFile, 
+                  skip=nL-1,
+                  fill=TRUE,
+                  sep="")
+data = read.csv(inputFile, 
+                       header = FALSE, comment.char="#",
+                       stringsAsFactors = FALSE, 
+                       fill=TRUE, 
+                       col.names= paste0("V",seq_len(length(nL))), 
+                       sep="")
 
-write.table(samples,file=output,sep='\t',row.names=F)
+# Parse the data
+data_parsed <- Parse(data)
+cat("Size of the matrix:", dim(data_parsed), "\n")
+
+# Rename and transform values from string to numeric
+names(data_parsed) <- gsub(".featureXML","",names(data_parsed))
+data_parsed[data_parsed=="NaN"]=NA
+data_parsed <- data.frame(apply(data_parsed,2,as.numeric))
+
+# Remove features with coverage less than 75%
+data_cov <- data_parsed[coverage(data_parsed,0.75),]
+data_cov[is.na(data_cov)] <- 0
+
+######## Perform PLSDA
+
+Y <- substr(names(data_cov),0,3)[-c(1,2)]
+X <- data_cov[,-c(1,2)]
+
+library(ropls)
+data.plsda <- opls(t(X), Y, predI = 2, scaleC='standard')
+
+plotdata <- data.frame(data.plsda@scoreMN, Y)
+
+plot.plsda <- ggplot(plotdata, aes(x=p1, y=p2,shape=Y, color=Y)) + geom_point(size=4) +
+  xlab("t1 (12%)") + ylab("t2 (11%)")  + theme_bw() 
+
+ggsave(outputFile, plot = plot.plsda, width = 10, height = 10)
 ```
 
 All you need to do in order to wrap this script in a Docker image is to write a [Dockerfile](https://docs.docker.com/engine/reference/builder/). An example follows.
 
 ```Docker
 FROM r-base
-MAINTAINER Stephanie Herman, stephanie.herman.3820@student.uu.se
+MAINTAINER Stephanie Herman, stephanie.herman@medsci.uu.se
 
-ADD log2transformation.r /
-ENTRYPOINT ["Rscript", "log2transformation.r"]
+ADD plsda.r /
+RUN ["Rscript", "plsda.r"]
 ```
 
 In the Dockerfile you first specify a base image that you want to start **FROM**. If you are working to an R-based service, like we are doing, the base image *r-base* is a good choice, as it includes all of the dependencies you need to run your script. Then, you provide the **MAINTAINER**, that is typically your name and a contact.
 
-The last two lines in our simple Docker file are the most important. The **ADD** instruction serves to add a file in the build context to a directory in your Docker image. In fact, we use it to add our *log2transformation.r* script in the root directory. Finally, the *ENTRYPOINT* instruction, specifies which command to run when the container will be started. Of course, we use it to run our script.
+The last two lines in our simple Docker file are the most important. The **ADD** instruction serves to add a file in the build context to a directory in your Docker image. In fact, we use it to add our *plsda.r* script in the root directory. Finally, the *RUN* instruction, specifies which command to execute and commits the results, when the container will be started. Of course, we use it to run our script.
 
 When you are done with the Dockerfile, you need to build the image. The `docker build` command does the job. 
 
 ```
-$ docker build -t log2transformation .
+$ docker build -t plsda .
 ```
 
-In the previous command we build the image, naming it *log2transformation*, and specifying the current directory as the build context. To successfully run this command, it is very important that the build context, the current directory, contains both the *Dockerfile* and the *log2transformation.r* script. If everything works fine it will say that the image was successfully built.
+In the previous command we build the image, naming it *plsda*, specifying the current directory as the build context. To successfully run this command, it is very important that the build context, the current directory, contains both the *Dockerfile* and the *plsda.r* script (and any other scripts that are needed). If everything works fine it will say that the image was successfully built.
 
-The `docker run` command serves to run a service that has been previously built. You can use this [input data](https://raw.githubusercontent.com/phnmnl/workflow-demo/master/data/log2_input.xls) to try out the following command.
+The `docker run` command serves to run a service that has been previously built.
 
 ```
-$ docker run -v /host/directory/data:/data log2transformation /data/log2_input.xls /data/log2_output.xls
+$ docker run -v /host/directory/data:/data plsda /data/textexporter.csv /data/plsda.png
 ```
 
-In the previous command we use the `-v` argument to specify a directory on our host machine, that will be mount on the Docker container. This directory is supposed to contain the [log2_input.xls](https://raw.githubusercontent.com/phnmnl/workflow-demo/master/data/log2_input.xls) file. Then we specify the name of the container that we aim to run (*log2transformation*), and the arguments that will be passed to the entry point command. We mounted the host direcory under */data* in the Docker container, hence we use the arguments to instruct the R script to read/write the input from/to it.    
+In the previous command we use the `-v` argument to specify a directory on our host machine, that will be mount on the Docker container (note that the full path needs to be provided). This directory is supposed to contain the [textexporter.csv] file. Then we specify the name of the container that we aim to run (*plsda*), and the arguments that will be passed to the **RUN** command. We mounted the host direcory under */data* in the Docker container, hence we use the arguments to instruct the R script to read/write the input from/to it.    
 
 You can read more on how to develop Docker images on the Docker [documentation](https://docs.docker.com/). 
