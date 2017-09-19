@@ -251,3 +251,10 @@ $ docker run -v /host/directory/data:/data plsda /data/textexporter.csv /data/pl
 In the previous command we use the `-v` argument to specify a directory on our host machine, that will be mount on the Docker container (note that the full path needs to be provided). This directory is supposed to contain the output of TextExporter. Then we specify the name of the container that we aim to run (*plsda*), and the arguments that will be passed to the **RUN** command. We mounted the host direcory under */data* in the Docker container, hence we use the arguments to instruct the R script to read/write the input from/to it.    
 
 You can read more on how to develop Docker images on the Docker [documentation](https://docs.docker.com/). 
+
+### Integrate your new container to the pipeline
+If you managed to successfully build the plsda Docker image, it should now be part of kubernetes. You can check this by the command `docker images`. Now try to connect your final downstream analysis node to the pipeline used previously.
+
+> **Tip:** Have a look at the JSON files located in the *pipelines* folder. You will need to create a new one that reads the output from the TextExporter and use the plsda Docker image to perform the last step.
+
+Good luck!
