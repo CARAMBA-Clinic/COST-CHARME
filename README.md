@@ -125,11 +125,31 @@ Did any new job get triggered? What data is being processed now? All available d
 ```bash
 > pachctl list-commit <repo-name>
 ```
+## Analyze your data in RStudio
+After exporting the TextExporter csv file, you are ready to do some downstream analysis.
+On your host machine, open a browser tab and go to localhost:8787. There you will find the common interface of RStudio, where we have placed the following code to get you started. 
+```R
+library(R.utils)
+library(ggplot2)
+.
+.
+inputFile = ""
+outputFile = ""
+.
+.
+ggsave(outputFile, plot = plot.plsda, width = 10, height = 10)
+```
+You need to change "inputFile" to the path of the file you exported from TextExporter and also pick an arbitrary name for your output.
+Now select the whole code inside the code editor and run using <kbd>Ctrl+Enter</kbd> or press source in the top right corrner. 
+You can explore your dataset using RStudio functionalities such as view(data_parsed) or by simply clicking the the variables in the environment window. Or how about doing a boxplot to see the distribution of the data ?
+```R
+boxplot(log2(data_parsed[,-c(1,2)]))
+```
 ## How to develop a simple R-based microservice with Docker
 
-In this section we show how to wrap an R-script in a Docker image, that can act as a microservice in a more complex workflow. For the best learning experience, we recommend that you repeat every step on your own.  
+In this section we show how to wrap your R-script in a Docker image and integrate it into your workflow using Pachyderm. For the best learning experience, we recommend that you repeat every step on your own.  
 
-Here we use an R-script peforming PLS-DA for demonstration. This process will take the output from the TextExporter as an input, and generate a PLS-DA score plot as an output. Feature with a coverage higher than 75% across all smaples will be considered and missing values will simply be imputed by zeros.
+Here we use the R-script peforming PLS-DA for demonstration. This process will take the output from the TextExporter as an input, and generate a PLS-DA score plot as an output. Features with a coverage higher than 75% across all samples will be considered and missing values will simply be imputed by zeros.
 
 ```R
 #!/usr/bin/env Rscript
