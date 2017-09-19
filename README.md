@@ -150,7 +150,7 @@ You can explore your dataset using RStudio functionalities such as view(data_par
 ```R
 boxplot(log2(data_parsed[,-c(1,2)]))
 ```
-## How to develop a simple R-based microservice with Docker
+## Optional: How to develop a simple R-based microservice with Docker
 
 In this section we show you how to wrap your R-script in a Docker image and integrate it into your workflow using Pachyderm. 
 This is a slightly modified version of the R script that you just used. The modification accounts for the need to be able to feed user specified input and output filenames through command line. Assuming that teh following R script has been saved as *plsda.r*, it ca be run using `plsda.r input output`. Where *input* is the path to the result from the TextExporter and *output* is the desired name of your plsda image.
@@ -224,10 +224,10 @@ In order to create a Docker container we follow the scheme recommended by Phenom
 FROM r-base
 MAINTAINER Stephanie Herman, stephanie.herman@medsci.uu.se
 
-# Fill out lines by looking at the given example
-RUN # install the needed linux and R packages
-ADD # add all scripts to container
-RUN # give execution permission to the R scripts
+# Fill out the lines by looking at the given example
+RUN #### install the needed linux and R packages
+ADD #### add all scripts to container
+RUN #### give execution permission to the R scripts
 ```
 
 In the Dockerfile you first specify a base image that you want to start **FROM**. If you are working to an R-based service, like we are doing, the base image *r-base* is a good choice, as it includes all of the dependencies you need to run your script. Then, you provide the **MAINTAINER**, that is typically your name and a contact.
