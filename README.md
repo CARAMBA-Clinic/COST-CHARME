@@ -189,7 +189,7 @@ RUN ["Rscript", "plsda.r"]
 
 In the Dockerfile you first specify a base image that you want to start **FROM**. If you are working to an R-based service, like we are doing, the base image *r-base* is a good choice, as it includes all of the dependencies you need to run your script. Then, you provide the **MAINTAINER**, that is typically your name and a contact.
 
-The last two lines in our simple Docker file are the most important. The **ADD** instruction serves to add a file in the build context to a directory in your Docker image. In fact, we use it to add our *plsda.r* script in the root directory. Finally, the *RUN* instruction, specifies which command to execute and commits the results, when the container will be started. Of course, we use it to run our script.
+The last two lines in our simple Docker file are the most important. The **ADD** instruction serves to add a file in the build context to a directory in your Docker image. In fact, we use it to add our *plsda.r* script in the root directory. Finally, the **RUN** instruction, specifies which command to execute and commits the results, when the container will be started. Of course, we use it to run our script.
 
 When you are done with the Dockerfile, you need to build the image. The `docker build` command does the job. 
 
