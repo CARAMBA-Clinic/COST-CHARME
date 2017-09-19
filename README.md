@@ -199,8 +199,7 @@ data_parsed <- data.frame(apply(data_parsed,2,as.numeric))
 data_cov <- data_parsed[coverage(data_parsed,0.75),]
 data_cov[is.na(data_cov)] <- 0
 
-######## Perform PLSDA
-
+# Perform PLSDA
 Y <- substr(names(data_cov),0,3)[-c(1,2)]
 X <- data_cov[,-c(1,2)]
 
@@ -208,6 +207,7 @@ data.plsda <- opls(t(X), Y, predI = 2, scaleC='standard')
 
 plotdata <- data.frame(data.plsda@scoreMN, Y)
 
+# Generate plot
 plot.plsda <- ggplot(plotdata, aes(x=p1, y=p2,shape=Y, color=Y)) + geom_point(size=4) +
   xlab("t1 (12%)") + ylab("t2 (11%)")  + theme_bw() 
 
