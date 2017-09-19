@@ -55,15 +55,26 @@ Here we will create a single repo which will serve as input for the first step o
 ```bash
 > pachctl create-repo mrpo
 ```
-You can push data into this repository using the put-file command. This will create a new commit, add data, and finish the commit. Explore further on how commits work.
+You can push data into this repository using the put-file command. This will create a new commit, add data, and finish the commit. Explore further on how commits work. The mass spectrometry raw data files are located in the MSData folder. First navigate to MSData: 
 ```bash
 > cd ./MSData
 ```
+Now push the data into the repository you created in the previous step:
+
 ```bash
 > pachctl put-file <name of the repo> <name of the branch> -c -r -p <number of files to upload in parallel> -f .
 ```
 ### Running a Pachyderm pipeline
-Once your data is in the repository, you are ready to start a bunch of pipelines cranking through data in a distributed fashion. Pipelines are the core processing primitive in Pachyderm and they’re specified with a JSON encoding. Explore the pipelines folder and find out which of the pipelines is the first step of the pre-processing workflow. You can find it by discovering which pipeline has the previously created repository as an input. Then run it using:
+Once your data is in the repository, you are ready to start a bunch of pipelines cranking through data in a distributed fashion. Pipelines are the core processing primitive in Pachyderm and they’re specified with a JSON encoding. Explore the pipelines folder and find out which of the pipelines is the first step of the pre-processing workflow. You can find it by discovering which pipeline has the previously created repository as an input. Have a look at the input section in the JSON files in the pipelines folder:
+```JSON
+ "input": {
+    "atom": {
+      "repo": "",
+      "glob": ""
+    }
+  }
+```
+Which one reads from the original repository and not from other tools ? Figure it out and then run it using:
 ```bash
 > pachctl create-pipeline -f <JSON file>
 ```
