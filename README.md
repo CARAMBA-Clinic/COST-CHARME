@@ -209,7 +209,7 @@ plotdata <- data.frame(data.plsda@scoreMN, Y)
 
 # Generate plot
 plot.plsda <- ggplot(plotdata, aes(x=p1, y=p2,shape=Y, color=Y)) + geom_point(size=4) +
-  xlab("t1 (12%)") + ylab("t2 (11%)")  + theme_bw() 
+  xlab("t1") + ylab("t2")  + theme_bw() 
 
 ggsave(outputFile, plot = plot.plsda, width = 10, height = 10)
 ```
