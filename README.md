@@ -153,7 +153,7 @@ boxplot(log2(data_parsed[,-c(1,2)]))
 ## How to develop a simple R-based microservice with Docker
 
 In this section we show you how to wrap your R-script in a Docker image and integrate it into your workflow using Pachyderm. 
-This is a slightly modified version of the R script that you just used. The modification accounts for the need to be able to feed user specified input and output filenames through command line. Assuming that teh following R script has been saved as *plsda.r*, it ca be run using *plsda.r input output*. Where *input* is the path to the result from the TextExporter and *output* is the desired name of your plsda image.
+This is a slightly modified version of the R script that you just used. The modification accounts for the need to be able to feed user specified input and output filenames through command line. Assuming that teh following R script has been saved as *plsda.r*, it ca be run using `plsda.r input output`. Where *input* is the path to the result from the TextExporter and *output* is the desired name of your plsda image.
 
 ```R
 #!/usr/bin/env Rscript
