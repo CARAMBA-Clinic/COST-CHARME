@@ -49,6 +49,10 @@ And if you need more information about a particular command please use:
 ```bash
 > pachctl <name of the command> --help
 ```
+
+> **Tip:** To do this exercise you can either use the Jupyter notebook terminal (go to New -> Terminal) on localhost:8888 or you can SSH into the machine to interact with the system.
+
+
 ### Pushing data into Pachyderm's Data Repository
 A repo is the highest level data primitive in Pachyderm. They should be dedicated to a single source of data such as the input from a particular tool. Examples include training data for an ML model or genome annotation data.
 Here we will create a single repo which will serve as input for the first step of the workflow:
@@ -217,7 +221,7 @@ ggsave(outputFile, plot = plot.plsda, width = 10, height = 10)
 In order to create a Docker container we follow the scheme recommended by Phenomenal (for guidance see the dockerized xcms R package: https://github.com/phnmnl/container-xcms). First, the required linux and R packages must be installed. The provided R scripts (see scripts folder) should be placed in a separate folder which is added to the appropriate folder inside the container and granted execution permission. Now, all you need to do in order to wrap your R script in a Docker image is to write a [Dockerfile](https://docs.docker.com/engine/reference/builder/). In order to do that, please have a look at the Dockerfile in the example.
 
 
-> **Tip:** To do this exercise you can either use the Jupyter notebook terminal or you can SSH into the machine to navigate and manage your structure.
+> **Tip:** To do this exercise you can either use the Jupyter notebook terminal on localhost:8888 or you can SSH into the machine to navigate and manage your structure.
 
 
 ```Docker
