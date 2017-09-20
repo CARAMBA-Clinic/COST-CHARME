@@ -22,6 +22,8 @@ You should be able to download the installation files for your operating system:
 - Install VirtualBox: https://www.virtualbox.org/wiki/Downloads
 
 ## Set up the vagrant box
+The box will be distributed through USB sticks. It is also available to download from: https://drive.google.com/drive/folders/0B-UIZY1NU7VzaUpCTlJpclpjbUE
+
 Using PowerShell or Terminal, navigate to the folder containing the box file and run:
 ```bash
 > vagrant up --provision
