@@ -7,7 +7,7 @@ You need to install Vagrant and Virtualbox.
 In Windows:
 
 - Install Chocolate: https://chocolatey.org/install
-
+- Install Vagrant: https://www.vagrantup.com/downloads.html
 - Install VirtualBox: https://www.virtualbox.org/wiki/Downloads
 
 - Open PowerShell and run: 
