@@ -131,7 +131,7 @@ Did any new job get triggered? What data is being processed now? All available d
 ```
 ## Analyze your data in RStudio
 After exporting the TextExporter csv file, you are ready to do some downstream analysis.
-On your host machine, open a browser tab and go to localhost:8787. There you will find the common interface of RStudio, where we have placed the following code to get you started. 
+On your host machine, open a browser tab and go to localhost:8787 (password and username is "vagrant"). There you will find the common interface of RStudio, where we have placed the following code to get you started. 
 ```R
 # required R packages
 library(R.utils)
